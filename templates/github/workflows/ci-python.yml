@@ -1,0 +1,46 @@
+# CI para projetos Python.
+# O Claude adapta: requirements vs pyproject/poetry/uv, mypy opcional, valor de cobertura.
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements.txt
+          pip install ruff mypy pytest pytest-cov pip-audit
+
+      - name: Formatação
+        run: ruff format --check .
+
+      - name: Lint (inclui complexidade máxima — C901 no pyproject)
+        run: ruff check .
+
+      - name: Tipos
+        run: mypy .
+
+      - name: Testes e cobertura
+        run: pytest --cov --cov-report=term-missing --cov-fail-under=85
+
+      - name: Auditoria de dependências
+        run: pip-audit -r requirements.txt

@@ -1,0 +1,57 @@
+# Rollback manual: Actions → Rollback → Run workflow → informe a tag (ex.: prod-2026.10.10-12).
+# Publica exatamente o commit daquela tag, usando o mesmo scripts/deploy.sh (com health check).
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag da versão para voltar (ex.: prod-2026.10.10-12)"
+        required: true
+
+concurrency:
+  group: deploy-producao
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Encontrar o commit da tag
+        id: alvo
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          SHA=$(git rev-list -n 1 "refs/tags/$TAG") || { echo "Tag $TAG não existe"; exit 1; }
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Voltando para $TAG ($SHA)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preparar chave SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy ~/.ssh/known_hosts
+
+      - name: Publicar versão anterior
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+          PORT: ${{ vars.DEPLOY_PORT || '22' }}
+          APP_DIR: ${{ vars.DEPLOY_PATH }}
+          HEALTH: ${{ vars.HEALTHCHECK_URL }}
+          SUBIR: ${{ vars.DEPLOY_COMANDO_SUBIR || 'docker compose up -d --build' }}
+          SHA: ${{ steps.alvo.outputs.sha }}
+        run: |
+          ssh -i ~/.ssh/deploy -p "$PORT" "$USER@$HOST" \
+            bash -s -- "'$APP_DIR'" "'$SHA'" "'$HEALTH'" "'$SUBIR'" < scripts/deploy.sh

@@ -1,0 +1,49 @@
+# CI para projetos Node/TypeScript.
+# O Claude adapta: remove etapas que não existem no projeto e usa os scripts reais do package.json.
+# Roda em todo PR e é chamado pelo deploy.yml antes de publicar (workflow_call).
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Formatação
+        run: npx prettier --check .
+
+      - name: Lint (inclui complexidade máxima)
+        run: npm run lint
+
+      - name: Tipos
+        run: npx tsc --noEmit
+
+      - name: Testes e cobertura
+        # o mínimo de cobertura fica no jest.config (coverageThreshold) / vitest.config
+        run: npm test -- --coverage
+
+      - name: Auditoria de dependências
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Build
+        run: npm run build --if-present

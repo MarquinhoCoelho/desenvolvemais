@@ -1,0 +1,52 @@
+# Teste de carga sob demanda: Actions → Teste de carga → Run workflow.
+# O k6 roda na máquina do GitHub (fora do seu servidor): o gerador de carga não gasta CPU do VPS.
+# Variables opcionais: CARGA_VIZINHOS (URLs de outros sites no mesmo servidor, separadas por vírgula).
+name: Teste de carga
+
+on:
+  workflow_dispatch:
+    inputs:
+      alvo:
+        description: "URL a testar"
+        required: true
+      perfil:
+        description: "Perfil"
+        type: choice
+        options: [smoke, carga, estresse, pico, resistencia]
+        default: smoke
+      confirmo:
+        description: "Perfis pesados: confirmo que o alvo NÃO é produção (ou que o servidor aguenta)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  carga:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trava de segurança
+        if: ${{ inputs.perfil != 'smoke' && !inputs.confirmo }}
+        run: |
+          echo "O perfil '${{ inputs.perfil }}' é pesado. Rode de novo marcando a confirmação."
+          exit 1
+
+      - uses: grafana/setup-k6-action@v1
+
+      - name: Rodar k6
+        env:
+          ALVO: ${{ inputs.alvo }}
+          PERFIL: ${{ inputs.perfil }}
+          VIZINHOS: ${{ vars.CARGA_VIZINHOS }}
+        run: k6 run -e ALVO="$ALVO" -e PERFIL="$PERFIL" -e VIZINHOS="$VIZINHOS" --summary-export=resultado.json testes/carga/carga.js
+
+      - name: Guardar resultado
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultado-carga-${{ inputs.perfil }}
+          path: resultado.json

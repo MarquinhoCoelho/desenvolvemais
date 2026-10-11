@@ -1,0 +1,62 @@
+# Deploy em VPS por SSH, disparado por merge na main.
+# 1) roda a CI inteira (ci.yml)  2) publica o commit exato no servidor  3) health check  4) tag de versão
+# Se o health check falhar, o scripts/deploy.sh volta sozinho para a versão anterior.
+#
+# Secrets (Settings → Secrets and variables → Actions → Secrets):
+#   DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS
+# Variables (mesma tela → aba Variables):
+#   DEPLOY_PATH (ex.: /opt/meu-projeto), HEALTHCHECK_URL (ex.: http://127.0.0.1:3000/health)
+#   DEPLOY_PORT (opcional, padrão 22), DEPLOY_COMANDO_SUBIR (opcional, padrão "docker compose up -d --build")
+# Passo a passo: guias/secrets-deploy.md
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-producao
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write   # para criar a tag de versão
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar chave SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy ~/.ssh/known_hosts
+
+      - name: Publicar no servidor
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+          PORT: ${{ vars.DEPLOY_PORT || '22' }}
+          APP_DIR: ${{ vars.DEPLOY_PATH }}
+          HEALTH: ${{ vars.HEALTHCHECK_URL }}
+          SUBIR: ${{ vars.DEPLOY_COMANDO_SUBIR || 'docker compose up -d --build' }}
+        run: |
+          ssh -i ~/.ssh/deploy -p "$PORT" "$USER@$HOST" \
+            bash -s -- "'$APP_DIR'" "'$GITHUB_SHA'" "'$HEALTH'" "'$SUBIR'" < scripts/deploy.sh
+
+      - name: Marcar versão
+        run: |
+          TAG="prod-$(date -u +%Y.%m.%d)-${{ github.run_number }}"
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "$TAG"
+          echo "Publicado: $TAG ($GITHUB_SHA)" >> "$GITHUB_STEP_SUMMARY"

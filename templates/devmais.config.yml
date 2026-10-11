@@ -1,0 +1,49 @@
+# .devmais/config.yml — configuração do fluxo neste projeto
+# O Claude lê este arquivo para saber o que ligar, quais comandos usar e quais limites aplicar.
+
+projeto: nome-do-projeto
+
+comandos:
+  instalar: npm ci
+  lint: npm run lint
+  tipos: npx tsc --noEmit
+  testes: npm test -- --coverage
+  build: npm run build
+
+gates:
+  cobertura_minima: 85        # comece pelo valor atual do projeto e suba aos poucos
+  complexidade_maxima: 10
+  auditoria: high             # bloqueia vulnerabilidade high ou critical
+
+# Agentes: ativo true/false. "auto" = só quando fizer sentido (ex.: UX só se o diff mexer no front).
+# modelo: opus (mais capaz) | sonnet (equilíbrio) | haiku (barato, tarefa mecânica)
+agentes:
+  planejador:        { ativo: true,  modelo: opus }
+  implementador:     { ativo: true,  modelo: sonnet }
+  revisor_spec:      { ativo: true,  modelo: sonnet }
+  revisor_qualidade: { ativo: true,  modelo: sonnet }
+  qa_adversarial:    { ativo: true,  modelo: opus }
+  revisor_seguranca: { ativo: auto,  modelo: opus }
+  revisor_ux:        { ativo: auto,  modelo: sonnet, design_system: docs/design-system.md }
+  explicador:        { ativo: true,  modelo: sonnet }
+
+deploy:
+  tipo: vps-docker            # vps-docker | vps-systemd | plataforma | nenhum
+  branch: main
+  pasta_no_servidor: /opt/nome-do-projeto
+  healthcheck: http://127.0.0.1:3000/health
+  comando_subir: docker compose up -d --build
+
+# Módulos opcionais (ver modulos-opcionais/ no kit)
+modulos:
+  testes_integracao_e2e: false
+  testes_carga: false
+  seguranca_ci: true
+  homologacao: false
+  revisao_claude_no_pr: false
+  evals_ia: false
+
+carga:                        # só se modulos.testes_carga = true
+  alvo: https://exemplo.com
+  vizinhos: []                # outros sites no mesmo servidor; se ficarem lentos, o teste para
+  limites: { p95_ms: 1500, erro_pct: 5 }
