@@ -43,7 +43,7 @@ Copie de `<KIT>/templates/` e **adapte** (comandos reais, nomes reais, sem place
 | `CLAUDE.md` | `templates/CLAUDE.md` (só aponta para o AGENTS.md) |
 | `.devmais/config.yml` | `templates/devmais.config.yml` |
 | `.claude/agents/*.md` | `agentes/*.md` — só os agentes ligados na config |
-| `.claude/settings.json` + `.claude/hooks/proteger-testes.mjs` | `templates/claude/` |
+| `.claude/settings.json` + `.claude/hooks/*.mjs` (proteger-testes, proteger-main) | `templates/claude/` (precisa de Node instalado) |
 | `.github/pull_request_template.md` | `templates/github/pull_request_template.md` |
 | `.github/workflows/ci.yml` | `templates/github/workflows/ci-<stack>.yml` |
 | `.github/workflows/deploy.yml` + `rollback.yml` | `templates/github/workflows/` (se tiver deploy) |
