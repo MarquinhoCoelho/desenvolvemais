@@ -20,4 +20,7 @@ Base de todo o fluxo. Vêm da palestra "Desenvolvimento com Agentes / Os Dois Si
 12. **Modelo certo para cada tarefa.** Barato e rápido para tarefa mecânica; mais capaz para planejar e revisar.
 13. **Rastreabilidade.** O ID da tarefa aparece na branch, nos commits, no PR e na tag do deploy.
     Um problema em produção leva até o commit e a tarefa de origem.
-14. **PR pequeno.** PR de 10 linhas recebe 14 comentários; PR de 500 linhas recebe "LGTM". Divida.
+14. **Qualidade tem 7 perguntas**, conferidas pelo revisor de qualidade:
+    utilidade · reutilização (sem generalizar antes da hora) · simplicidade · testabilidade ·
+    legibilidade · segurança e performance · documentação.
+15. **PR pequeno.** PR de 10 linhas recebe 14 comentários; PR de 500 linhas recebe "LGTM". Divida.

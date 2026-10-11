@@ -18,7 +18,9 @@ O pedido do dev (e o ID da tarefa, se houver). Leia `AGENTS.md` e `.devmais/conf
    - diz o **mínimo** de código para passar;
    - cabe num commit.
 4. Liste casos de borda que precisam de teste: vazio, nulo/undefined, limite, valor inválido, falha externa, permissão.
-5. Aponte riscos: migração de banco, quebra de contrato de API, impacto em outras telas.
+5. Antes de fechar o plano, confira: cada passo é **útil** para o pedido? Já existe algo no projeto que dá para
+   **reaproveitar**? É a solução **mais simples** que funciona? (Não planeje abstração para uso futuro hipotético.)
+6. Aponte riscos: migração de banco, quebra de contrato de API, impacto em outras telas.
 
 ## Saída (formato fixo)
 ```

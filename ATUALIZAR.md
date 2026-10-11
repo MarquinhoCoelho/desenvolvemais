@@ -1,14 +1,38 @@
 # ATUALIZAR — roteiro para o Claude
 
-> O kit desenvolvemais evoluiu e o dev quer trazer as melhorias para um projeto que já foi configurado.
+> O kit desenvolvemais evoluiu e o dev quer trazer as melhorias para um projeto que **já foi configurado** com o INSTALAR.md.
+> Projeto que ainda não tem `.devmais/config.yml` → use o [INSTALAR.md](INSTALAR.md), não este arquivo.
 
-1. Leia `kit_versao` em `.devmais/config.yml` do projeto (commit do kit usado na instalação).
-2. No kit: `git -C <KIT> pull` e depois `git -C <KIT> log --oneline <kit_versao>..HEAD` e
-   `git -C <KIT> diff --stat <kit_versao>..HEAD -- templates agentes`.
-3. Para cada arquivo do kit que mudou e existe no projeto:
-   - compare com a versão do projeto, que **foi adaptada** (comandos, nomes, limites);
-   - aplique só a melhoria do kit, preservando as adaptações do projeto.
-4. Mostre ao dev a lista do que vai mudar, uma linha por item, e espere o OK.
-5. Aplique numa branch `chore/devmais-atualizacao`, atualize `kit_versao` com o commit atual do kit, rode os comandos da CI e abra PR.
+`<KIT>` = pasta do kit no computador do dev.
 
-Nunca sobrescreva arquivo do projeto inteiro com o template: o projeto pode ter ajustes que o kit não conhece.
+## 1. Descobrir de qual versão o projeto partiu
+- Leia `kit_versao` em `.devmais/config.yml` (tag `vX.Y.Z` ou commit do kit usado na instalação).
+- Atualize o kit: `git -C <KIT> pull`.
+- Se `kit_versao` não existir ou não for encontrado no kit (`git -C <KIT> cat-file -e <kit_versao>` falha):
+  não há base para comparar. Compare cada arquivo do projeto com o template atual e trate **toda** diferença
+  como possível adaptação do projeto — pergunte ao dev em caso de dúvida.
+
+## 2. Ver o que mudou no kit
+```
+git -C <KIT> log --oneline <kit_versao>..HEAD
+git -C <KIT> diff --stat <kit_versao>..HEAD -- templates agentes modulos-opcionais
+```
+Separe em três grupos:
+- **Arquivos que o projeto tem e o kit melhorou** (ex.: workflow de deploy, um agente).
+- **Novidades** que o projeto ainda não tem (template, atalho, hook ou módulo opcional novo) — oferecer, não instalar direto.
+- **Mudanças só de documentação** do kit — não afetam o projeto; não mexa.
+
+## 3. Aplicar sem perder as adaptações do projeto
+Para cada arquivo do primeiro grupo:
+- veja **o que mudou no kit** (`git -C <KIT> diff <kit_versao>..HEAD -- <arquivo>`), não o arquivo inteiro;
+- aplique essa mudança no arquivo do projeto, preservando o que o projeto adaptou (comandos, nomes, URLs, limites);
+- se a mudança do kit conflita com uma adaptação do projeto, pergunte ao dev.
+
+Nunca sobrescreva um arquivo do projeto inteiro com o template.
+
+## 4. Mostrar e esperar o OK
+Lista curta: uma linha por item, dizendo o que muda e o benefício. Novidades opcionais à parte, com recomendação.
+
+## 5. Entregar
+Branch `chore/devmais-atualizacao` → aplica → atualiza `kit_versao` para a versão atual do kit
+(`git -C <KIT> describe --tags --always`) → roda os comandos da CI → abre PR listando o que mudou.

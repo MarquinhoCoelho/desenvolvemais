@@ -52,7 +52,7 @@ Copie de `<KIT>/templates/` e **adapte** (comandos reais, nomes reais, sem place
 |---|---|
 | `AGENTS.md` | `templates/AGENTS.md` |
 | `CLAUDE.md` | `templates/CLAUDE.md` (só aponta para o AGENTS.md) |
-| `.devmais/config.yml` | `templates/devmais.config.yml` — preencha `kit_versao` com `git -C <KIT> rev-parse --short HEAD` |
+| `.devmais/config.yml` | `templates/devmais.config.yml` — preencha `kit_versao` com `git -C <KIT> describe --tags --always` |
 | `.devmais/smoke.txt` | `templates/smoke.txt` — com as URLs reais de produção (só leitura) |
 | `.claude/agents/*.md` | `agentes/*.md` — só os agentes ligados na config, com o `model:` da config |
 | `.claude/commands/*.md` | `templates/claude/commands/` (atalhos `/tarefa`, `/status`, `/corrigir`, `/explicar`, `/rollback`) |

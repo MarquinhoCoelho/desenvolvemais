@@ -2,7 +2,7 @@
 # O Claude lê este arquivo para saber o que ligar, quais comandos usar e quais limites aplicar.
 
 projeto: nome-do-projeto
-kit_versao: abc1234           # commit do desenvolvemais usado na instalação (para ATUALIZAR.md)
+kit_versao: v1.0.0            # versão (tag ou commit) do desenvolvemais usada na instalação — ATUALIZAR.md usa isso
 
 comandos:
   instalar: npm ci

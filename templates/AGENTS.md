@@ -24,6 +24,8 @@
 - [ ] Tipos sem erro.
 - [ ] Auditoria sem vulnerabilidade alta conhecida.
 - [ ] Revisões (spec → qualidade) aprovadas; QA rodado; achados graves decididos pelo dev.
+- [ ] As 7 perguntas de qualidade respondidas: utilidade, reutilização, simplicidade, testabilidade,
+      legibilidade, segurança/performance, documentação (README/`.env.example` atualizados se mudou como usar).
 - [ ] Revisão final do diff inteiro: sem debug, TODO solto ou arquivo esquecido.
 - [ ] Página/endpoint importante alterado está no `.devmais/smoke.txt`.
 - [ ] PR aberto com o modelo do projeto.
