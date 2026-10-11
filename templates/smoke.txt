@@ -1,0 +1,11 @@
+# .devmais/smoke.txt — o que é conferido em PRODUÇÃO depois de cada deploy.
+# Se qualquer linha falhar, o deploy volta sozinho para a versão anterior.
+# Formato:  URL  STATUS  [TEMPO_MAX_MS]  [TEXTO QUE DEVE APARECER]
+# Só páginas/endpoints de LEITURA (nada que crie, altere ou apague dado).
+#
+# Exemplos:
+https://meusite.com.br/                 200  3000  Entrar
+https://meusite.com.br/api/health       200  2000
+https://meusite.com.br/login            200  3000
+https://meusite.com.br/api/produtos     200  2000
+https://meusite.com.br/admin            302

@@ -1,9 +1,11 @@
 # desenvolvemais
 
 Especificação de um fluxo de desenvolvimento profissional com Claude Code: plano em TDD, agentes revisores,
-QA que tenta quebrar o código, CI que bloqueia erro, deploy por branch e rollback.
+QA que tenta quebrar o código, CI que bloqueia erro, deploy automático que testa a produção, volta sozinho
+quando algo dá errado e avisa o dev com a explicação.
 
 Não é um framework para instalar. São documentos e modelos que **o Claude lê e adapta ao seu projeto**.
+Funciona com a assinatura do Claude Code e o GitHub grátis. **Não precisa de chave de API.**
 
 ## Como usar
 
@@ -13,21 +15,38 @@ Não é um framework para instalar. São documentos e modelos que **o Claude lê
    ```
 2. Abra o Claude Code **dentro do seu projeto** e peça:
    > Leia `<caminho>/desenvolvemais/INSTALAR.md` e configure esse fluxo no meu projeto.
-3. O Claude vai analisar o projeto, fazer algumas perguntas e mostrar o que vai criar antes de criar.
-4. Quando ele precisar de algo que só você tem (token, chave, URL), ele te passa o passo a passo.
+3. O Claude analisa o projeto, faz algumas perguntas e mostra o que vai criar antes de criar.
+4. Quando ele precisar de algo que só você tem (login, chave, URL), ele te passa o passo a passo.
 
-Depois de configurado, é só pedir as tarefas normalmente. O Claude segue o fluxo sozinho.
+Para trazer melhorias novas do kit para um projeto já configurado:
+> Leia `<caminho>/desenvolvemais/ATUALIZAR.md` e atualize meu projeto.
+
+## No dia a dia
+
+| Você digita | O que acontece |
+|---|---|
+| `/tarefa <descrição>` | plano → você aprova → implementa em TDD → revisões → QA → PR |
+| `/status` | produção, últimos deploys, falhas abertas, PRs |
+| `/corrigir` | investiga a última falha, explica e corrige com teste primeiro |
+| `/explicar [o quê]` | explica o que foi feito ou a arquitetura |
+| `/rollback [versão]` | volta a produção para uma versão anterior |
+
+Sozinho, sem você pedir:
+- CI em todo PR; deploy no merge na `main`;
+- teste da produção depois de cada deploy; **volta automática** se algo falhar;
+- aviso da falha com diagnóstico, que o Claude te explica ao abrir a próxima conversa;
+- trava que impede o Claude de alterar teste existente sem sua confirmação ou de mexer direto na `main`.
 
 ## O que tem aqui
 
-| Pasta | Para quê |
+| Arquivo/pasta | Para quê |
 |---|---|
-| [INSTALAR.md](INSTALAR.md) | Roteiro que o Claude segue para configurar um projeto |
-| [fluxo/](fluxo/) | Como o trabalho anda: princípios, tarefa, git, CI, deploy, rollback |
-| [agentes/](agentes/) | Agentes prontos (planejador, implementador, revisores, QA, UX, segurança, explicador) |
-| [modulos-opcionais/](modulos-opcionais/) | Ligue se fizer sentido: testes de carga, integração/E2E, segurança, UX, homologação, evals de IA |
-| [templates/](templates/) | Arquivos-modelo: AGENTS.md, config, template de PR, workflows do GitHub Actions, hooks, k6 |
-| [guias/](guias/) | Passo a passo para o dev: login no GitHub, secrets, chave SSH de deploy |
+| [INSTALAR.md](INSTALAR.md) · [ATUALIZAR.md](ATUALIZAR.md) | Roteiros que o Claude segue |
+| [fluxo/](fluxo/) | Como o trabalho anda: princípios, tarefa, git, CI, deploy, quando algo falha |
+| [agentes/](agentes/) | Planejador, implementador, revisores, QA, UX, segurança, explicador |
+| [modulos-opcionais/](modulos-opcionais/) | Liga se fizer sentido: carga, integração/E2E, segurança, UX, observabilidade, homologação, evals de IA |
+| [templates/](templates/) | Modelos: AGENTS.md, config, PR, workflows, scripts de deploy e teste de produção, hooks, atalhos |
+| [guias/](guias/) | Passo a passo para o dev: login no GitHub, token, preparar o servidor |
 
 ## O fluxo em uma imagem
 
@@ -35,10 +54,10 @@ Depois de configurado, é só pedir as tarefas normalmente. O Claude segue o flu
 pedido ─► planejador (passos TDD) ─► você aprova
    └► implementador: teste vermelho → código → teste verde → commit   (um passo por vez)
    └► revisor de spec: "fez só o pedido?"   ─► revisor de qualidade: "está bem feito?"
-   └► QA tenta quebrar · segurança · UX (se mexeu no front)
+   └► QA tenta quebrar · segurança · UX (se mexeu no front) · revisão final do conjunto
    └► você decide os achados graves: corrige (teste primeiro) ou aceita o risco por escrito
-   └► PR com modelo fixo ─► CI repete as verificações
-   └► merge na main ─► CI de novo ─► deploy ─► health check ─► se falhar, volta sozinho
+   └► PR com modelo fixo ─► CI
+   └► merge ─► CI de novo ─► deploy ─► testa produção ─► falhou? volta sozinho + te avisa
 ```
 
 ## Funciona sem GitHub Pro
@@ -46,3 +65,7 @@ pedido ─► planejador (passos TDD) ─► você aprova
 Em repositório privado no plano grátis o GitHub não deixa "travar" o botão de merge.
 Por isso a proteção fica **no próprio pipeline de deploy**: ele roda todos os testes de novo e só
 publica se passar. Detalhes em [fluxo/05-deploy-e-rollback.md](fluxo/05-deploy-e-rollback.md).
+
+Origem das ideias: palestra "Desenvolvimento com Agentes / Os Dois Sistemas"; testes:
+[stsw](https://github.com/fabriciosantana/stsw); segurança: [OWASP Top 10](https://owasp.org/Top10/) e
+[Cheat Sheets](https://cheatsheetseries.owasp.org).

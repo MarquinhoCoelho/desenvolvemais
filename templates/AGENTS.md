@@ -24,6 +24,8 @@
 - [ ] Tipos sem erro.
 - [ ] Auditoria sem vulnerabilidade alta conhecida.
 - [ ] Revisões (spec → qualidade) aprovadas; QA rodado; achados graves decididos pelo dev.
+- [ ] Revisão final do diff inteiro: sem debug, TODO solto ou arquivo esquecido.
+- [ ] Página/endpoint importante alterado está no `.devmais/smoke.txt`.
 - [ ] PR aberto com o modelo do projeto.
 
 ## Fluxo de trabalho
@@ -42,6 +44,19 @@
 ## Testes são o contrato
 - Proibido alterar teste existente para fazê-lo passar.
 - Mudar um teste existente exige OK explícito do dev e aviso na seção "Testes alterados" do PR.
+
+## Quando algo falha
+- Deploy com falha volta sozinho para a versão anterior e abre uma issue `deploy-falhou`.
+  Ao abrir a conversa, o hook `status-deploy` avisa — explique ao dev em até 4 frases (onde, causa provável,
+  produção está segura?) e pergunte se ele quer que você corrija.
+- Corrigir = branch `fix/...` → **teste que reproduz e falha** → correção mínima → revisores → PR.
+  Não conseguiu reproduzir? Não chute: diga o que tentou e o que precisa.
+- Não corrija sozinho (peça decisão) se envolver: dado de produção, produção fora do ar, causa fora do código,
+  ou alterar teste existente.
+- Comandos: `gh run list --workflow Deploy`, `gh run view <id> --log-failed`, `gh issue list --label deploy-falhou`.
+
+## Atalhos para o dev
+`/tarefa <descrição>` · `/status` · `/corrigir [issue ou erro]` · `/explicar [o quê]` · `/rollback [tag]`
 
 ## Segurança
 - Nunca colocar senha, token ou chave em arquivo versionado. Use `.env` (fora do git) ou GitHub Secrets.

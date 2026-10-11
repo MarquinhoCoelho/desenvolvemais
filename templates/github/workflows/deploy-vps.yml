@@ -1,12 +1,14 @@
-# Deploy em VPS por SSH, disparado por merge na main.
-# 1) roda a CI inteira (ci.yml)  2) publica o commit exato no servidor  3) health check  4) tag de versão
-# Se o health check falhar, o scripts/deploy.sh volta sozinho para a versão anterior.
+# Deploy em VPS por SSH, disparado por merge na main. Não precisa de chave de API de IA.
 #
-# Secrets (Settings → Secrets and variables → Actions → Secrets):
-#   DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS
-# Variables (mesma tela → aba Variables):
-#   DEPLOY_PATH (ex.: /opt/meu-projeto), HEALTHCHECK_URL (ex.: http://127.0.0.1:3000/health)
-#   DEPLOY_PORT (opcional, padrão 22), DEPLOY_COMANDO_SUBIR (opcional, padrão "docker compose up -d --build")
+#  1. CI inteira (ci.yml)                     → falhou: nada é publicado
+#  2. Publica o commit no servidor            → health check interno falhou: deploy.sh volta sozinho
+#  3. Testa a produção de fora (smoke.txt)    → falhou: volta sozinho para a última versão boa
+#  4. Deu tudo certo                          → tag prod-AAAA.MM.DD-N e fecha avisos de falha antigos
+#  5. Deu algo errado                         → abre uma issue "deploy-falhou" com o diagnóstico;
+#                                               o Claude do dev vê essa issue ao abrir a conversa
+#
+# Secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS
+# Variables: DEPLOY_PATH, HEALTHCHECK_URL, [DEPLOY_PORT], [DEPLOY_COMANDO_SUBIR]
 # Passo a passo: guias/secrets-deploy.md
 name: Deploy
 
@@ -26,24 +28,31 @@ jobs:
   deploy:
     needs: ci
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     permissions:
-      contents: write   # para criar a tag de versão
+      contents: write   # criar a tag de versão
+      issues: write     # fechar avisos de falha antigos
+    outputs:
+      publicar: ${{ steps.publicar.outcome }}
+      smoke: ${{ steps.smoke.outcome }}
+      rollback: ${{ steps.rollback.outcome }}
+      versao_anterior: ${{ steps.anterior.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Preparar chave SSH
+      - name: Última versão boa
+        id: anterior
+        run: |
+          TAG=$(git tag -l 'prod-*' --sort=-creatordate | head -n 1)
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if [ -n "$TAG" ]; then echo "sha=$(git rev-list -n 1 "$TAG")" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Preparar acesso ao servidor
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy
-          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/deploy ~/.ssh/known_hosts
-
-      - name: Publicar no servidor
-        env:
           HOST: ${{ secrets.DEPLOY_HOST }}
           USER: ${{ secrets.DEPLOY_USER }}
           PORT: ${{ vars.DEPLOY_PORT || '22' }}
@@ -51,8 +60,29 @@ jobs:
           HEALTH: ${{ vars.HEALTHCHECK_URL }}
           SUBIR: ${{ vars.DEPLOY_COMANDO_SUBIR || 'docker compose up -d --build' }}
         run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy ~/.ssh/known_hosts
+          # publicar <commit>: roda scripts/deploy.sh no servidor
+          cat > ~/publicar.sh <<EOF
           ssh -i ~/.ssh/deploy -p "$PORT" "$USER@$HOST" \
-            bash -s -- "'$APP_DIR'" "'$GITHUB_SHA'" "'$HEALTH'" "'$SUBIR'" < scripts/deploy.sh
+            bash -s -- "'$APP_DIR'" "'\$1'" "'$HEALTH'" "'$SUBIR'" < scripts/deploy.sh
+          EOF
+          chmod +x ~/publicar.sh
+
+      - name: Publicar no servidor
+        id: publicar
+        run: ~/publicar.sh "$GITHUB_SHA"
+
+      - name: Testar produção
+        id: smoke
+        run: bash scripts/smoke.sh .devmais/smoke.txt
+
+      - name: Voltar para a última versão boa
+        id: rollback
+        if: failure() && steps.smoke.outcome == 'failure' && steps.anterior.outputs.sha != ''
+        run: ~/publicar.sh "${{ steps.anterior.outputs.sha }}"
 
       - name: Marcar versão
         run: |
@@ -60,3 +90,69 @@ jobs:
           git tag "$TAG" "$GITHUB_SHA"
           git push origin "$TAG"
           echo "Publicado: $TAG ($GITHUB_SHA)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fechar avisos de falha resolvidos
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --label deploy-falhou --state open --json number --jq '.[].number' 2>/dev/null || true); do
+            gh issue close "$n" --comment "Resolvido: deploy de ${GITHUB_SHA::7} passou em todos os testes."
+          done
+
+  avisar-falha:
+    needs: [ci, deploy]
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Abrir issue com o diagnóstico
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CI: ${{ needs.ci.result }}
+          PUBLICAR: ${{ needs.deploy.outputs.publicar || 'não rodou' }}
+          SMOKE: ${{ needs.deploy.outputs.smoke || 'não rodou' }}
+          ROLLBACK: ${{ needs.deploy.outputs.rollback || 'não rodou' }}
+          ANTERIOR: ${{ needs.deploy.outputs.versao_anterior || 'nenhuma' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          if [ "$CI" != "success" ]; then
+            ETAPA="Testes/CI"; PRODUCAO="Intocada: nada foi publicado."
+          elif [ "$PUBLICAR" = "failure" ]; then
+            ETAPA="Publicação no servidor (health check)"; PRODUCAO="O servidor tentou voltar sozinho para a versão anterior (ver log)."
+          elif [ "$SMOKE" = "failure" ] && [ "$ROLLBACK" = "success" ]; then
+            ETAPA="Teste de produção (smoke)"; PRODUCAO="Voltou para a última versão boa: $ANTERIOR."
+          elif [ "$SMOKE" = "failure" ]; then
+            ETAPA="Teste de produção (smoke)"; PRODUCAO="ATENÇÃO: não foi possível voltar automaticamente. Verifique já."
+          else
+            ETAPA="Pós-deploy (tag/avisos)"; PRODUCAO="A versão nova está no ar e passou nos testes."
+          fi
+
+          TITULO_COMMIT="$(printf '%s\n' "$COMMIT_MSG" | head -n 1)"
+
+          gh label create deploy-falhou --color D93F0B --description "Deploy falhou (desenvolvemais)" --force
+          gh issue create --label deploy-falhou \
+            --title "Deploy falhou em: $ETAPA (${GITHUB_SHA::7})" \
+            --body "$(cat <<EOF
+          ## Resumo
+          - **Onde falhou:** $ETAPA
+          - **Produção:** $PRODUCAO
+          - **Commit:** \`${GITHUB_SHA}\` — $TITULO_COMMIT
+          - **Log:** $RUN_URL
+
+          | Etapa | Resultado |
+          |---|---|
+          | CI | $CI |
+          | Publicar | $PUBLICAR |
+          | Testar produção | $SMOKE |
+          | Rollback automático | $ROLLBACK |
+
+          ## Para o Claude
+          1. \`gh run view ${{ github.run_id }} --log-failed\` para ver o erro.
+          2. Explique ao dev em poucas frases: o que falhou, onde, provável causa, e se a produção está segura.
+          3. Se o dev pedir para corrigir: siga \`fluxo/06-quando-algo-falha.md\` do kit desenvolvemais
+             (reproduzir com teste vermelho → corrigir → PR). Esta issue fecha sozinha no próximo deploy bom.
+          EOF
+          )"

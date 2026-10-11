@@ -6,10 +6,21 @@
 merge na main
   └► GitHub Actions: roda a CI inteira de novo
        └► passou? ─► conecta no servidor por SSH ─► publica o commit exato
-                         └► health check
-                              ├─ OK     ─► cria tag prod-AAAA.MM.DD-N
-                              └─ falhou ─► volta sozinho para o commit anterior e avisa
+                         └► health check interno (no servidor)
+                              └─ falhou ─► servidor volta sozinho para o commit anterior
+                         └► teste de produção de fora (.devmais/smoke.txt: páginas, status, tempo de resposta)
+                              └─ falhou ─► volta para a última versão boa (tag prod-*)
+                         └► tudo OK ─► tag prod-AAAA.MM.DD-N + fecha avisos de falha antigos
+  └► qualquer falha ─► issue "deploy-falhou" com diagnóstico ─► o Claude avisa o dev na próxima conversa
 ```
+
+O que fazer quando falha: [06-quando-algo-falha.md](06-quando-algo-falha.md).
+
+## O teste de produção (`.devmais/smoke.txt`)
+
+Uma linha por página/endpoint importante: URL, status esperado, tempo máximo e (opcional) um texto que precisa aparecer.
+Roda de fora do servidor, como um usuário. Só URLs de **leitura** — nada que crie ou apague dado.
+Sempre que uma tarefa mexer numa página importante, a linha dela entra (ou é ajustada) no `smoke.txt`.
 
 Isso protege produção mesmo **sem GitHub Pro**: o deploy depende da CI dentro do mesmo workflow.
 

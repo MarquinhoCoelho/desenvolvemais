@@ -2,6 +2,7 @@
 # O Claude lê este arquivo para saber o que ligar, quais comandos usar e quais limites aplicar.
 
 projeto: nome-do-projeto
+kit_versao: abc1234           # commit do desenvolvemais usado na instalação (para ATUALIZAR.md)
 
 comandos:
   instalar: npm ci
@@ -39,6 +40,7 @@ modulos:
   testes_integracao_e2e: false
   testes_carga: false
   seguranca_ci: true
+  observabilidade: 1          # 0 = nada | 1 = monitor de disponibilidade | 2 = + erros (Sentry) | 3 = + funil
   homologacao: false
   revisao_claude_no_pr: false
   evals_ia: false

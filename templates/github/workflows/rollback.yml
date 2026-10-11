@@ -55,3 +55,6 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy -p "$PORT" "$USER@$HOST" \
             bash -s -- "'$APP_DIR'" "'$SHA'" "'$HEALTH'" "'$SUBIR'" < scripts/deploy.sh
+
+      - name: Testar produção
+        run: bash scripts/smoke.sh .devmais/smoke.txt

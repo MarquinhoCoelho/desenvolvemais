@@ -10,6 +10,7 @@ Estes módulos o dev liga conforme o contexto, em `.devmais/config.yml` → `mod
 | [testes-carga.md](testes-carga.md) | sistema com tráfego real, antes de campanha/lançamento, ou após mudança de performance | médio |
 | [seguranca.md](seguranca.md) | sempre que tiver login, dados de usuário ou pagamento | baixo |
 | [ux.md](ux.md) | projeto com front-end | baixo |
+| [observabilidade.md](observabilidade.md) | sistema em produção com usuários reais (nível 1 é grátis e leva 15 min) | baixo |
 | [homologacao.md](homologacao.md) | cliente precisa aprovar antes, ou mudanças de alto risco frequentes | alto (mais um ambiente) |
 | [revisao-claude-no-pr.md](revisao-claude-no-pr.md) | time com mais de um dev, ou PRs de outras pessoas | uso de API a cada PR |
 | [evals-ia.md](evals-ia.md) | o produto usa LLM/agente (chatbot, assistente, classificação) | médio |

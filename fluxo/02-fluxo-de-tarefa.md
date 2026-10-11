@@ -17,8 +17,10 @@ o trabalho para os agentes de [agentes/](../agentes/) e junta os resultados.
      qa-adversarial      ─► tenta quebrar o conjunto
      revisor-seguranca   ─► (se ligado)
      revisor-ux          ─► (se ligado e o diff mexeu no front)
-5. achados CRITICAL/HIGH ─► dev decide: corrigir (teste vermelho primeiro) ou aceitar risco por escrito
-6. gates locais (mesmos da CI) ─► PR com o modelo fixo
+5. revisão final do conjunto: o diff inteiro da branch faz sentido junto? sobrou debug, TODO, arquivo esquecido?
+6. achados CRITICAL/HIGH ─► dev decide: corrigir (teste vermelho primeiro) ou aceitar risco por escrito
+7. gates locais (mesmos da CI) ─► PR com o modelo fixo
+8. mudou uma página/endpoint importante? acrescente a linha correspondente em .devmais/smoke.txt
 ```
 
 ## Quando pular etapas
