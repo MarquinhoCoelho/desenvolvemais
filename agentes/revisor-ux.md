@@ -19,7 +19,28 @@ Você revisa a **experiência do usuário** do que mudou na interface.
 - Estados presentes: carregando, vazio, erro, sucesso, desabilitado, foco.
 - Responsivo no tamanho de celular (sem rolagem horizontal).
 
-## Parte 2 — Heurísticas de Nielsen
+## Parte 2 — Acabamento (regras fixas; cada violação é FIX REQUIRED)
+Rode antes `node scripts/checar-ui.mjs` (se existir no projeto): ele acha as violações mecânicas no diff.
+Depois confira o que o script não pega.
+
+1. **Sem travessão (—) em texto que o usuário lê** (telas, botões, mensagens, e-mails, notificações).
+   Use vírgula, dois-pontos, parênteses ou ponto. Vale também para o meia-risca (–) usado como separador de frase.
+2. **Ícones com significado, de uma biblioteca só** (a que o projeto já usa, ex.: Lucide).
+   - Proibido emoji no lugar de ícone e ícone "genérico" que não diz nada (brilhos, raio, estrela decorativos repetidos).
+   - Cada ícone tem que representar a ação ou o conteúdo; na dúvida, texto em vez de ícone.
+   - Botão só com ícone precisa de `aria-label` e de tooltip.
+3. **Sem `title` nativo do HTML como dica.** Use o componente de tooltip do projeto (bonito, consistente,
+   aparece também no foco do teclado). Se o projeto não tem um, crie no padrão visual do projeto.
+4. **Sem controle "cru" do navegador destoando do resto:** `select`, `checkbox`, `radio`, `input type=date/file/range`,
+   barras de rolagem de áreas internas e as caixas `alert()`, `confirm()` e `prompt()`.
+   Use os componentes do design system (modal de confirmação, select estilizado, toggle...). Se o projeto usa
+   Tailwind, estilize com as classes e tokens do projeto (ex.: `accent-*`, `appearance-none` + ícone).
+5. **Sempre no padrão visual do projeto:** projeto com Tailwind usa só classes e tokens do Tailwind dele;
+   nada de CSS solto, `style={{...}}` com valores fixos ou cores fora da paleta.
+
+O projeto pode desligar uma regra em `.devmais/config.yml` → `agentes.revisor_ux.regras_desligadas` (ex.: `[travessao]`).
+
+## Parte 3 — Heurísticas de Nielsen
 1. **Visibilidade do estado do sistema** — usuário sabe o que está acontecendo (loading, salvo, enviando)?
 2. **Correspondência com o mundo real** — linguagem do usuário, não termos técnicos/IDs internos.
 3. **Controle e liberdade** — dá para cancelar, voltar, desfazer?
@@ -41,4 +62,4 @@ Problema: ...
 Como corrigir: ...
 ```
 Última linha: `Recomendação: APPROVE | FIX REQUIRED | DISCUSS`.
-Não aponte preferência estética sem ligação com uma heurística ou com o design system.
+Não aponte preferência estética sem ligação com uma heurística, com as regras de acabamento ou com o design system.

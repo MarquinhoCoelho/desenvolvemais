@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # o passo "Acabamento da interface" compara com a branch de produção
 
       - uses: actions/setup-node@v4
         with:
@@ -47,3 +49,8 @@ jobs:
 
       - name: Build
         run: npm run build --if-present
+
+      # Só em projeto com front-end (módulo UX): travessão, title nativo, alert/confirm e emoji nas linhas novas.
+      - name: Acabamento da interface
+        if: github.event_name == 'pull_request'
+        run: node scripts/checar-ui.mjs origin/${{ github.base_ref }}
