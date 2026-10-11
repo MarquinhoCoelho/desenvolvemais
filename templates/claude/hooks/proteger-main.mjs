@@ -17,7 +17,8 @@ function lerEntrada() {
 }
 
 const entrada = lerEntrada();
-const comando = entrada?.tool_input?.command ?? "";
+// Blocos de texto (heredoc: <<'EOF' ... EOF) são dados, não comandos: mensagem de commit, script Python etc.
+const comando = (entrada?.tool_input?.command ?? "").replace(/<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?\n\s*\2\s*(?=\n|$)/g, "<<texto");
 if (!/\bgit\b/.test(comando)) process.exit(0);
 
 const base = entrada?.cwd || process.env.CLAUDE_PROJECT_DIR || process.cwd();
@@ -66,14 +67,15 @@ function bloquear(motivo) {
   process.exit(0);
 }
 
-const ehPush = /\bgit\b[^;&|]*\bpush\b/.test(comando);
-const ehCommit = /\bgit\b[^;&|]*\bcommit\b/.test(comando);
-const depoisDoPush = comando.replace(/^.*\bpush\b/, "");
+// Só os argumentos de cada "git ... push" (até ; && | ou fim da linha): texto de mensagem de commit não conta.
+const argsDoPush = [...comando.matchAll(/\bgit\b[^;&|\n]*?\bpush\b([^;&|\n]*)/g)].map((m) => m[1]);
+const ehPush = argsDoPush.length > 0;
+const ehCommit = /\bgit\b[^;&|\n]*\bcommit\b/.test(comando);
 
-if (ehPush && /(--force\b|\s-f\b|--force-with-lease)/.test(depoisDoPush)) {
+if (argsDoPush.some((a) => /(--force\b|\s-f\b|--force-with-lease)/.test(a))) {
   bloquear("Push forçado é bloqueado pelo fluxo desenvolvemais. Peça ao dev para fazer manualmente, se for mesmo necessário.");
 }
-if (ehPush && new RegExp(`(^|\\s|:)(${nomes})(\\s|$)`).test(depoisDoPush)) {
+if (argsDoPush.some((a) => new RegExp(`(^|\\s|:)(${nomes})(\\s|$)`).test(a))) {
   bloquear(`Push direto na branch de produção (${[...protegidas].join("/")}) é bloqueado. Crie uma branch (feature/<ID>-...) e abra um Pull Request.`);
 }
 if ((ehCommit || ehPush) && protegidas.has(branchAtual)) {
