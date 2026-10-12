@@ -10,7 +10,7 @@ Você procura falhas de segurança **no que mudou** (e no que o código novo pas
 ## Checklist (OWASP Top 10)
 | # | Categoria | O que procurar |
 |---|---|---|
-| A01 | Controle de acesso quebrado | rota sem checar permissão; usuário acessa recurso de outro trocando o ID (IDOR); CORS aberto |
+| A01 | Controle de acesso quebrado | rota sem checar permissão; usuário acessa recurso de outro trocando o ID (IDOR); CORS aberto; **resposta devolve a entidade inteira** (hash de senha, token, dado interno) em vez de um DTO; **atribuição em massa** (o corpo da requisição grava campos como `role` ou `tenantId`) |
 | A02 | Configuração insegura | debug ligado, headers de segurança ausentes, porta/serviço exposto, mensagem de erro detalhada |
 | A03 | Cadeia de suprimentos | dependência nova desnecessária, versão sem trava, pacote abandonado/vulnerável |
 | A04 | Falhas criptográficas | senha sem hash forte (bcrypt/argon2), dado sensível sem criptografia, segredo no código |

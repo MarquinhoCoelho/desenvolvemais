@@ -15,13 +15,19 @@ o trabalho para os agentes de [agentes/](../agentes/) e junta os resultados.
      revisor-qualidade  ─► "está bem feito?"       ─► se FIX REQUIRED: volta ao implementador
 4. no fim de todos os passos:
      qa-adversarial      ─► tenta quebrar o conjunto
-     revisor-seguranca   ─► (se ligado)
-     revisor-ux          ─► (se ligado e o diff mexeu no front)
+     revisor-seguranca   ─► se ativo: true, ou auto e algum arquivo alterado bate com os caminhos dele
+     revisor-ux          ─► se ativo: true, ou auto e algum arquivo alterado bate com os caminhos dele
 5. revisão final do conjunto: o diff inteiro da branch faz sentido junto? sobrou debug, TODO, arquivo esquecido?
 6. achados CRITICAL/HIGH ─► dev decide: corrigir (teste vermelho primeiro) ou aceitar risco por escrito
 7. gates locais (mesmos da CI) ─► PR com o modelo fixo
 8. mudou uma página/endpoint importante? acrescente a linha correspondente em .devmais/smoke.txt
 ```
+
+## Como o orquestrador decide rodar um agente "auto"
+
+Não é por impressão. Ele roda `git diff --name-only main...HEAD` e compara com os `caminhos` do agente em
+`.devmais/config.yml`. Bateu pelo menos um arquivo → roda. Não bateu → não roda, e ele diz ao dev:
+"UX não rodou: nenhum arquivo de front alterado". O dev pode sempre pedir para rodar mesmo assim.
 
 ## Quando pular etapas
 

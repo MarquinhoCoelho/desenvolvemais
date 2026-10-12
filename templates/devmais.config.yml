@@ -16,7 +16,9 @@ gates:
   complexidade_maxima: 10
   auditoria: high             # bloqueia vulnerabilidade high ou critical
 
-# Agentes: ativo true/false. "auto" = só quando fizer sentido (ex.: UX só se o diff mexer no front).
+# Agentes: ativo true | false | auto.
+# "auto" = roda só se algum arquivo alterado na branch (git diff --name-only main...HEAD)
+# bate com os "caminhos" do agente. Regra objetiva, não opinião do orquestrador.
 # modelo: opus (mais capaz) | sonnet (equilíbrio) | haiku (barato, tarefa mecânica)
 agentes:
   planejador:        { ativo: true,  modelo: opus }
@@ -24,10 +26,20 @@ agentes:
   revisor_spec:      { ativo: true,  modelo: sonnet }
   revisor_qualidade: { ativo: true,  modelo: sonnet }
   qa_adversarial:    { ativo: true,  modelo: opus }
-  revisor_seguranca: { ativo: auto,  modelo: opus }
-  revisor_ux:        { ativo: auto,  modelo: sonnet, design_system: docs/design-system.md, regras_desligadas: [] }
-  # regras de acabamento que dá para desligar: travessao, title_nativo, dialogo_nativo, emoji_icone
+  revisor_seguranca:
+    ativo: auto
+    modelo: opus
+    caminhos: ["**/auth/**", "**/middleware*/**", "**/*upload*", "**/migrations/**", "**/*.env.example", "Dockerfile", "docker-compose*.yml", "package.json"]
+  revisor_ux:
+    ativo: auto
+    modelo: sonnet
+    design_system: docs/design-system.md
+    caminhos: ["web/src/**", "**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.css", "**/*.scss", "**/*.html"]
+    regras_desligadas: []     # regras de acabamento que dá para desligar: travessao, title_nativo, dialogo_nativo, emoji_icone
   explicador:        { ativo: true,  modelo: sonnet }
+
+api:
+  paginacao_max: 100          # nenhuma rota de lista devolve mais que isso por chamada
 
 deploy:
   tipo: vps-docker            # vps-docker | vps-systemd | plataforma | nenhum

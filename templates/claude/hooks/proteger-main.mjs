@@ -67,10 +67,16 @@ function bloquear(motivo) {
   process.exit(0);
 }
 
-// Só os argumentos de cada "git ... push" (até ; && | ou fim da linha): texto de mensagem de commit não conta.
-const argsDoPush = [...comando.matchAll(/\bgit\b[^;&|\n]*?\bpush\b([^;&|\n]*)/g)].map((m) => m[1]);
+// O subcomando do git é a primeira palavra depois de "git" e das opções globais (-C <pasta>, -c k=v, --opcao).
+// Assim "push"/"main" dentro de uma mensagem (git commit -m "push main") não contam.
+const OPCOES_GLOBAIS = String.raw`(?:\s+(?:-[Cc]\s+(?:"[^"]*"|'[^']*'|\S+)|--?[\w-]+(?:=\S+)?))*`;
+const subcomando = (nome) => new RegExp(String.raw`(?:^|[;&|(\n]|\s)git${OPCOES_GLOBAIS}\s+${nome}\b([^;&|\n]*)`, "g");
+// Texto entre aspas é dado (mensagem de commit, string), não comando: some antes de procurar push/commit.
+const semTextos = comando.replace(/"(?:[^"\\]|\\.)*"|'[^']*'/g, '""');
+// Só os argumentos de cada "git push" (até ; && | ou fim da linha).
+const argsDoPush = [...semTextos.matchAll(subcomando("push"))].map((m) => m[1]);
 const ehPush = argsDoPush.length > 0;
-const ehCommit = /\bgit\b[^;&|\n]*\bcommit\b/.test(comando);
+const ehCommit = [...semTextos.matchAll(subcomando("commit"))].length > 0;
 
 if (argsDoPush.some((a) => /(--force\b|\s-f\b|--force-with-lease)/.test(a))) {
   bloquear("Push forçado é bloqueado pelo fluxo desenvolvemais. Peça ao dev para fazer manualmente, se for mesmo necessário.");
