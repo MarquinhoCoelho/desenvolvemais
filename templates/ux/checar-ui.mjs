@@ -39,7 +39,8 @@ const REGRAS = [
   {
     id: "emoji_icone",
     msg: "emoji na interface (use um ícone da biblioteca do projeto)",
-    teste: (l) => /\p{Extended_Pictographic}/u.test(l.replace(/\/\/.*$/, "")) && !/^\s*(\*|\/\/)/.test(l),
+    // © ® ™ contam como "pictográfico" no Unicode, mas são texto normal de rodapé.
+    teste: (l) => /\p{Extended_Pictographic}/u.test(l.replace(/\/\/.*$/, "").replace(/[©®™]/g, "")) && !/^\s*(\*|\/\/)/.test(l),
   },
 ].filter((r) => !desligadas.includes(r.id));
 
