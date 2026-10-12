@@ -81,4 +81,4 @@ Origem das ideias: palestra "Desenvolvimento com Agentes / Os Dois Sistemas"; te
 ## Contribuir com o kit
 
 Achou bug ou melhoria usando o kit num projeto? Abra um PR aqui com o caso de teste em `testes/`.
-Antes: `node --test "testes/*.test.mjs"` (a CI do kit roda o mesmo em todo PR). Registre a mudança no [CHANGELOG.md](CHANGELOG.md).
+Antes: `node --test "testes/*.test.mjs"` (Node 22 ou mais novo) (a CI do kit roda o mesmo em todo PR). Registre a mudança no [CHANGELOG.md](CHANGELOG.md).
