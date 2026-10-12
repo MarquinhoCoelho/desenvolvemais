@@ -1,18 +1,29 @@
 # .github/dependabot.yml — o GitHub abre PRs atualizando dependências (grátis, inclusive em repositório privado).
-# Cada PR passa pela CI normal; se os testes passarem, é seguro mesclar.
+# Configurado para fazer POUCO barulho:
+#   - uma vez por mês, todas as atualizações pequenas (minor + patch) juntas num PR só;
+#   - versões grandes (major), que costumam quebrar, NÃO viram PR automático. Faça como tarefa planejada
+#     ("/tarefa atualizar o <pacote> para a versão X") quando fizer sentido.
+#   - correções de segurança continuam chegando pelo "Dependabot security updates" (Settings → Code security).
 # O Claude ajusta o "package-ecosystem": npm | pip | composer | maven | gradle | docker | ...
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 2
     groups:
       menores:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      acoes:
+        patterns: ["*"]

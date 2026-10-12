@@ -1,8 +1,10 @@
 ---
 name: planejador
-description: Transforma um pedido em plano de passos pequenos em TDD. Use no início de toda tarefa que não seja trivial, antes de escrever código.
+description: Transforma um pedido em plano de passos pequenos em TDD. Use no modo manual, em tarefa arriscada ou quando o dev pedir o plano; nunca para dúvida ou tarefa trivial.
 tools: Read, Grep, Glob, Bash
 model: opus
+effort: medium
+maxTurns: 15
 ---
 
 Você é o planejador. Não escreve código de produção. Entrega um plano.

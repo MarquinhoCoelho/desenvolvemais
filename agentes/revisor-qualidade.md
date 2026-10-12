@@ -1,8 +1,10 @@
 ---
 name: revisor-qualidade
-description: Confere se o código está bem feito pelas 7 perguntas de qualidade (utilidade, reutilização, simplicidade, testabilidade, legibilidade, segurança/performance, documentação). Use depois do revisor-spec aprovar.
+description: Confere se o código está bem feito pelas 7 perguntas de qualidade. Use no modo manual (ou tarefa arriscada) depois do revisor-spec aprovar; no modo automático use o revisor-geral.
 tools: Read, Grep, Glob, Bash
 model: sonnet
+effort: medium
+maxTurns: 12
 ---
 
 Você responde: **"está bem feito?"**. O escopo já foi aprovado pelo revisor de spec.

@@ -3,6 +3,8 @@ name: revisor-seguranca
 description: Revisa o diff com base no OWASP Top 10 e nas OWASP Cheat Sheets. Use antes do PR quando a mudança mexe em autenticação, autorização, entrada de usuário, banco, arquivos, chamadas externas, segredos ou dependências.
 tools: Read, Grep, Glob, Bash, WebFetch
 model: opus
+effort: medium
+maxTurns: 15
 ---
 
 Você procura falhas de segurança **no que mudou** (e no que o código novo passou a alcançar).

@@ -1,17 +1,17 @@
 ---
-description: Executa uma tarefa pelo fluxo completo (plano TDD, implementação, revisões, QA, PR)
+description: Executa uma tarefa no modo do projeto (automático ou manual), com o processo que ela merece
 argument-hint: [ID opcional] descrição da tarefa
 ---
 Tarefa: $ARGUMENTS
 
-Siga o fluxo do AGENTS.md:
-1. Agente `planejador` → mostre o plano ao dev e espere aprovação.
-2. Para cada passo, um de cada vez: `implementador` → `revisor-spec` → `revisor-qualidade` (corrigindo o que pedirem).
-3. No fim: `qa-adversarial`. Para `revisor-seguranca` e `revisor-ux`: se `ativo: true`, rode; se `ativo: auto`, rode
-   só se algum arquivo de `git diff --name-only main...HEAD` bater com os `caminhos` do agente na config
-   — e diga ao dev quais rodaram e quais não (e por quê).
-4. Revisão final do conjunto: diff completo da branch coerente, sem sobra de debug, sem arquivo esquecido.
-5. Achados CRITICAL/HIGH → dev decide (corrigir com teste primeiro ou aceitar risco por escrito).
-6. Rode os mesmos comandos da CI localmente. Tudo verde → PR com o modelo do projeto.
-
-Entre as etapas, atualize o dev em uma linha. No fim: link do PR, achados e decisões, e o que falta (se algo).
+1. Leia `modo` em `.devmais/config.yml` (o dev pode ter pedido outro nesta conversa; vale o pedido dele).
+2. Classifique: trivial, normal ou arriscada (tabela "Fluxo de trabalho" do AGENTS.md). Diga o tipo em uma linha.
+3. Siga o processo do AGENTS.md para esse tipo e modo:
+   - **Trivial:** faz direto → gates locais → branch + PR.
+   - **Normal + automático:** implementa você mesmo em TDD → `revisor-geral` no fim → UX/segurança se
+     `git diff --name-only main...HEAD` bater com os `caminhos` → PR → merge com CI verde se `merge_automatico: true`.
+   - **Normal + manual, ou arriscada:** `planejador` → dev aprova → `implementador` passo a passo → `revisor-spec` →
+     `revisor-qualidade` → `qa-adversarial` (+ UX/segurança por caminhos) → PR → dev aprova o merge.
+4. Achados CRITICAL/HIGH, regra ambígua, dado de produção ou teste existente → pare e pergunte ao dev.
+5. Termine com o resumo de regra de negócio (Feito / Testado / Publicado / Decisão sua). No modo manual, inclua
+   também a lista de achados e decisões.

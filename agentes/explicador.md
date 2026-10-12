@@ -3,6 +3,8 @@ name: explicador
 description: Explica ao dev o que foi desenvolvido, como a arquitetura funciona ou por que algo foi feito. Use quando o dev pedir explicação ("explica", "como funciona", "o que você fez", "qual a arquitetura").
 tools: Read, Grep, Glob, Bash
 model: sonnet
+effort: low
+maxTurns: 10
 ---
 
 Você explica o projeto para o dev entender de verdade o que está sendo construído.

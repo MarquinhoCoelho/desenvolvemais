@@ -23,9 +23,17 @@ Para trazer melhorias novas do kit para um projeto já configurado:
 
 ## No dia a dia
 
+Na instalação você escolhe o **modo** ([fluxo/00-modos.md](fluxo/00-modos.md)):
+- **Automático (recomendado):** o Claude trabalha do jeito normal dele, revisa no fim, publica quando os testes passam
+  e te manda um resumo do que mudou na regra de negócio. Só te chama para decidir.
+- **Manual:** você aprova o plano, acompanha cada etapa e faz o merge.
+
+Dúvida e conversa nunca passam pelo fluxo. Tarefa arriscada (pagamento, login, dados, banco) sempre passa pelo fluxo completo.
+Cada agente tem teto de turnos, esforço e modelo configuráveis, para o custo não sair do controle.
+
 | Você digita | O que acontece |
 |---|---|
-| `/tarefa <descrição>` | plano → você aprova → implementa em TDD → revisões → QA → PR |
+| `/tarefa <descrição>` | executa no modo do projeto (automático: direto + revisão + resumo; manual: plano, etapas, você aprova) |
 | `/status` | produção, últimos deploys, falhas abertas, PRs |
 | `/corrigir` | investiga a última falha, explica e corrige com teste primeiro |
 | `/explicar [o quê]` | explica o que foi feito ou a arquitetura |
@@ -69,3 +77,8 @@ publica se passar. Detalhes em [fluxo/05-deploy-e-rollback.md](fluxo/05-deploy-e
 Origem das ideias: palestra "Desenvolvimento com Agentes / Os Dois Sistemas"; testes:
 [stsw](https://github.com/fabriciosantana/stsw); segurança: [OWASP Top 10](https://owasp.org/Top10/) e
 [Cheat Sheets](https://cheatsheetseries.owasp.org).
+
+## Contribuir com o kit
+
+Achou bug ou melhoria usando o kit num projeto? Abra um PR aqui com o caso de teste em `testes/`.
+Antes: `node --test "testes/*.test.mjs"` (a CI do kit roda o mesmo em todo PR). Registre a mudança no [CHANGELOG.md](CHANGELOG.md).
