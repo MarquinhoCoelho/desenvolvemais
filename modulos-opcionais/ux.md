@@ -25,6 +25,11 @@ Se não existir, o Claude cria um `docs/design-system.md` **a partir do que o pr
 Se o projeto usa Figma, o Claude pode ler tokens e componentes pelo MCP do Figma, quando disponível.
 
 ## O que o revisor confere
+- Regras de acabamento (fixas): sem travessão em texto de interface, ícones com significado de uma biblioteca só,
+  tooltip do projeto em vez de `title` nativo, nada de controle cru do navegador (`alert`, `select` sem estilo...),
+  sempre no padrão visual do projeto (Tailwind: só classes e tokens do projeto).
+  O script [`templates/ux/checar-ui.mjs`](../templates/ux/checar-ui.mjs) acha as violações mecânicas no diff;
+  instale em `scripts/checar-ui.mjs` e rode na CI (passo "Acabamento da interface").
 - Usa componentes e tokens do design system (sem cor/tamanho solto).
 - Estados: carregando, vazio, erro, sucesso, desabilitado.
 - As 10 heurísticas de Nielsen (lista completa no agente).

@@ -63,10 +63,24 @@ Copie de `<KIT>/templates/` e **adapte** (comandos reais, nomes reais, sem place
 | `.github/workflows/deploy.yml` + `rollback.yml` | `templates/github/workflows/deploy-vps.yml` e `rollback.yml` (se tiver deploy em VPS) |
 | `scripts/deploy.sh` + `scripts/smoke.sh` | `templates/deploy/` (se o deploy for por SSH) |
 | `.gitattributes` | `templates/gitattributes` — mescle se já existir (garante `.sh` com quebra de linha Linux) |
+| `scripts/checar-ui.mjs` | `templates/ux/checar-ui.mjs` — se o projeto tem front-end (regras de acabamento do revisor de UX) |
 | módulos opcionais | conforme cada arquivo em `modulos-opcionais/` |
 
 Deploy em plataforma gerenciada (Vercel, Netlify, Render...): use só a CI + `smoke.sh` num workflow que roda após o
 deploy da plataforma (evento `deployment_status`); o rollback é o "promote/rollback" da própria plataforma.
+
+### Branch de produção com outro nome
+Se a produção não é a `main` (ex.: `producao`), ponha o nome em `deploy.branch` do `.devmais/config.yml`: os hooks
+protegem essa branch e o `checar-ui.mjs` compara com ela. Troque `branches: [main]` no `deploy.yml` pelo nome real.
+
+### Pasta com vários repositórios (workspace)
+Se o dev abre o Claude numa pasta que contém vários repositórios (ex.: `specs/`, `api/`, `pagamentos/`), o Claude Code
+só carrega o `.claude/` da pasta aberta. Então, além de instalar em cada repositório:
+- crie um `.claude/settings.json` **na pasta aberta** chamando os hooks de um dos repositórios
+  (`node "$CLAUDE_PROJECT_DIR/<repo>/.claude/hooks/proteger-main.mjs"`) e o `status-deploy.mjs` com as pastas dos
+  repositórios como argumentos (`... status-deploy.mjs <repo1> <repo2>`);
+- copie `.claude/agents/` e `.claude/commands/` para a pasta aberta (são cópias locais; a fonte fica no repositório).
+Os hooks descobrem sozinhos o repositório de cada comando (`cd <repo> && git ...` ou `git -C <repo> ...`).
 
 Regras:
 - Nunca coloque segredo em arquivo. Segredo vai em GitHub Secrets ou `.env` fora do git.

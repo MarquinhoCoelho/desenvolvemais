@@ -2,12 +2,24 @@
 // Criar teste novo é livre (TDD). Editar um teste que JÁ EXISTE na branch principal
 // faz o Claude Code pedir confirmação ao dev antes de aplicar.
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { basename, dirname, relative } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { basename, dirname, join, relative } from "node:path";
 
 const PADRAO_TESTE =
   /(^|[\/\\])(tests?|__tests__|spec|e2e|cypress)[\/\\]|\.(test|spec|cy)\.[cm]?[jt]sx?$|(^|[\/\\])test_[^\/\\]+\.py$|_test\.(py|go)$|Test\.(java|kt|cs)$/i;
-const BRANCHES_PRINCIPAIS = ["origin/main", "main", "origin/master", "master"];
+// main/master e a branch de produção do projeto (.devmais/config.yml → deploy.branch).
+function branchesPrincipais(pasta) {
+  const lista = ["origin/main", "main", "origin/master", "master"];
+  try {
+    const raiz = execFileSync("git", ["rev-parse", "--show-toplevel"], { cwd: pasta, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    const cfg = join(raiz, ".devmais", "config.yml");
+    const b = existsSync(cfg) ? /^\s*branch:\s*([\w./-]+)/m.exec(readFileSync(cfg, "utf8"))?.[1] : null;
+    if (b) lista.unshift(`origin/${b}`, b);
+  } catch {
+    // fora de um repositório: só main/master
+  }
+  return lista;
+}
 
 function lerEntrada() {
   try {
@@ -20,7 +32,7 @@ function lerEntrada() {
 // Pergunta ao git a partir da pasta do próprio arquivo ("<branch>:./<nome>"),
 // assim não depende do formato de caminho do sistema operacional.
 function existeNaPrincipal(caminho) {
-  return BRANCHES_PRINCIPAIS.some((branch) => {
+  return branchesPrincipais(dirname(caminho)).some((branch) => {
     try {
       execFileSync("git", ["cat-file", "-e", `${branch}:./${basename(caminho)}`], {
         cwd: dirname(caminho),
