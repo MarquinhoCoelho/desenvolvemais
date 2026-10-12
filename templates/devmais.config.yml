@@ -16,27 +16,41 @@ gates:
   complexidade_maxima: 10
   auditoria: high             # bloqueia vulnerabilidade high ou critical
 
+# Modo de trabalho (kit: fluxo/00-modos.md). Dúvidas e conversas nunca passam pelo fluxo.
+#   automatico — o Claude trabalha direto, uma revisão no fim, resumo de regra de negócio; só chama o dev para decidir
+#   manual     — plano aprovado, passo a passo com revisores, dev faz o merge
+modo: automatico
+merge_automatico: true        # só no modo automático, com CI verde; tarefa arriscada sempre pede OK
+
 # Agentes: ativo true | false | auto.
 # "auto" = roda só se algum arquivo alterado na branch (git diff --name-only main...HEAD)
 # bate com os "caminhos" do agente. Regra objetiva, não opinião do orquestrador.
-# modelo: opus (mais capaz) | sonnet (equilíbrio) | haiku (barato, tarefa mecânica)
+# Controle de custo (vão para o cabeçalho de cada .claude/agents/*.md):
+#   modelo:     haiku (barato) | sonnet (equilíbrio) | opus (mais capaz, ~2x sonnet)
+#   esforco:    low | medium | high      → campo "effort"
+#   max_turnos: teto de turnos do agente → campo "maxTurns" (para e devolve o que tem)
 agentes:
-  planejador:        { ativo: true,  modelo: opus }
-  implementador:     { ativo: true,  modelo: sonnet }
-  revisor_spec:      { ativo: true,  modelo: sonnet }
-  revisor_qualidade: { ativo: true,  modelo: sonnet }
-  qa_adversarial:    { ativo: true,  modelo: opus }
+  revisor_geral:     { ativo: true,  modelo: sonnet, esforco: medium, max_turnos: 12 }   # modo automático
+  planejador:        { ativo: true,  modelo: opus,   esforco: medium, max_turnos: 15 }   # manual ou arriscada
+  implementador:     { ativo: true,  modelo: sonnet, esforco: medium, max_turnos: 30 }   # manual
+  revisor_spec:      { ativo: true,  modelo: sonnet, esforco: low,    max_turnos: 8 }    # manual
+  revisor_qualidade: { ativo: true,  modelo: sonnet, esforco: medium, max_turnos: 12 }   # manual
+  qa_adversarial:    { ativo: true,  modelo: sonnet, esforco: high,   max_turnos: 20 }   # manual ou arriscada
   revisor_seguranca:
     ativo: auto
     modelo: opus
+    esforco: medium
+    max_turnos: 15
     caminhos: ["**/auth/**", "**/middleware*/**", "**/*upload*", "**/migrations/**", "**/*.env.example", "Dockerfile", "docker-compose*.yml", "package.json"]
   revisor_ux:
     ativo: auto
     modelo: sonnet
+    esforco: low
+    max_turnos: 10
     design_system: docs/design-system.md
     caminhos: ["web/src/**", "**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.css", "**/*.scss", "**/*.html"]
     regras_desligadas: []     # regras de acabamento que dá para desligar: travessao, title_nativo, dialogo_nativo, emoji_icone
-  explicador:        { ativo: true,  modelo: sonnet }
+  explicador:        { ativo: true,  modelo: sonnet, esforco: low,    max_turnos: 10 }
 
 api:
   paginacao_max: 100          # nenhuma rota de lista devolve mais que isso por chamada

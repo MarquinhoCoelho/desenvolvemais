@@ -31,8 +31,14 @@ Descubra e anote, sem perguntar o que dá para descobrir sozinho:
 
 ## Etapa 2 — Perguntar só o que faltou
 
-Faça no máximo 5 perguntas, curtas, com uma opção recomendada. Exemplos:
+Faça no máximo 5 perguntas, curtas, com uma opção recomendada. **A primeira é sempre o modo** ([fluxo/00-modos.md](fluxo/00-modos.md)):
 
+- Como você quer trabalhar?
+  - **Automático (recomendado):** o Claude desenvolve do jeito normal dele, faz uma revisão no fim, publica sozinho
+    quando os testes passam e te manda um resumo do que mudou na regra de negócio. Só te chama para decidir.
+  - **Manual:** você aprova o plano, acompanha cada etapa e faz o merge.
+  Em qualquer modo, dúvidas e conversas são respondidas direto, sem fluxo; e tarefa arriscada (pagamento, login,
+  dados, banco) sempre passa pelo fluxo completo.
 - Onde roda produção? (VPS com Docker / plataforma gerenciada / ainda não tem)
 - Quer deploy automático ao fazer merge na `main`, com teste de produção e volta automática se falhar? (recomendado: sim)
 - Quais módulos opcionais ligar? Mostre a lista de [modulos-opcionais/](modulos-opcionais/) com uma linha de cada
@@ -54,7 +60,7 @@ Copie de `<KIT>/templates/` e **adapte** (comandos reais, nomes reais, sem place
 | `CLAUDE.md` | `templates/CLAUDE.md` (só aponta para o AGENTS.md) |
 | `.devmais/config.yml` | `templates/devmais.config.yml` — preencha `kit_versao` com `git -C <KIT> describe --tags --always`; ajuste os `caminhos` de UX e segurança às pastas reais do projeto |
 | `.devmais/smoke.txt` | `templates/smoke.txt` — com as URLs reais de produção (só leitura) |
-| `.claude/agents/*.md` | `agentes/*.md` — só os agentes ligados na config, com o `model:` da config |
+| `.claude/agents/*.md` | `agentes/*.md` — só os agentes ligados na config. No cabeçalho de cada um, grave os valores da config: `model` ← `modelo`, `effort` ← `esforco`, `maxTurns` ← `max_turnos` (são o controle de custo; os padrões do kit já são econômicos) |
 | `.claude/commands/*.md` | `templates/claude/commands/` (atalhos `/tarefa`, `/status`, `/corrigir`, `/explicar`, `/rollback`) |
 | `.claude/settings.json` + `.claude/hooks/*.mjs` | `templates/claude/` — mescle com settings existente |
 | `.github/pull_request_template.md` | `templates/github/pull_request_template.md` |
@@ -79,7 +85,10 @@ só carrega o `.claude/` da pasta aberta. Então, além de instalar em cada repo
 - crie um `.claude/settings.json` **na pasta aberta** chamando os hooks de um dos repositórios
   (`node "$CLAUDE_PROJECT_DIR/<repo>/.claude/hooks/proteger-main.mjs"`) e o `status-deploy.mjs` com as pastas dos
   repositórios como argumentos (`... status-deploy.mjs <repo1> <repo2>`);
-- copie `.claude/agents/` e `.claude/commands/` para a pasta aberta (são cópias locais; a fonte fica no repositório).
+- copie `templates/claude/sincronizar-workspace.mjs` para o `.claude/` do repositório principal e ponha no
+  `SessionStart` do settings da pasta aberta:
+  `node "$CLAUDE_PROJECT_DIR/<repo>/.claude/sincronizar-workspace.mjs" <repo>` — a cada conversa ele copia
+  `.claude/agents/` e `.claude/commands/` do repositório para a pasta aberta (a fonte fica no repositório; não edite as cópias).
 Os hooks descobrem sozinhos o repositório de cada comando (`cd <repo> && git ...` ou `git -C <repo> ...`).
 
 Regras:

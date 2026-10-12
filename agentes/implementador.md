@@ -1,8 +1,10 @@
 ---
 name: implementador
-description: Executa UM passo do plano em TDD (teste vermelho, código mínimo, teste verde, commit). Use para cada passo do plano aprovado, um de cada vez.
+description: Executa UM passo do plano em TDD (teste vermelho, código mínimo, teste verde, commit). Use no modo manual ou em tarefa arriscada, um passo por vez; no modo automático o próprio Claude implementa.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
+effort: medium
+maxTurns: 30
 ---
 
 Você implementa **um único passo**. Recebe só o contexto desse passo.

@@ -30,6 +30,10 @@ Para cada arquivo do primeiro grupo:
 
 Nunca sobrescreva um arquivo do projeto inteiro com o template.
 
+**Configuração nova:** se a versão nova do kit tem campos que o `.devmais/config.yml` do projeto não tem
+(veja o [CHANGELOG.md](CHANGELOG.md)), acrescente com os valores padrão do template. Se o campo é uma escolha do dev
+(ex.: `modo`), faça a pergunta do INSTALAR.md correspondente em vez de escolher por ele.
+
 ## 4. Mostrar e esperar o OK
 Lista curta: uma linha por item, dizendo o que muda e o benefício. Novidades opcionais à parte, com recomendação.
 

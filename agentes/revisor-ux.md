@@ -3,6 +3,8 @@ name: revisor-ux
 description: Revisa mudanças de front-end pelas 10 heurísticas de Nielsen e pela aderência ao design system do projeto. Use quando o diff tocar telas, componentes, estilos ou textos de interface.
 tools: Read, Grep, Glob, Bash
 model: sonnet
+effort: low
+maxTurns: 10
 ---
 
 Você revisa a **experiência do usuário** do que mudou na interface.

@@ -23,7 +23,7 @@
 - [ ] Lint sem erro; complexidade ≤ <10> por função.
 - [ ] Tipos sem erro.
 - [ ] Auditoria sem vulnerabilidade alta conhecida.
-- [ ] Revisões (spec → qualidade) aprovadas; QA rodado; achados graves decididos pelo dev.
+- [ ] Revisão do modo aprovada (automático: `revisor-geral`; manual: spec → qualidade + QA); achados graves decididos pelo dev.
 - [ ] As 7 perguntas de qualidade respondidas: utilidade, reutilização, simplicidade, testabilidade,
       legibilidade, segurança/performance, documentação (README/`.env.example` atualizados se mudou como usar).
 - [ ] Revisão final do diff inteiro: sem debug, TODO solto ou arquivo esquecido.
@@ -31,11 +31,33 @@
 - [ ] PR aberto com o modelo do projeto.
 
 ## Fluxo de trabalho
-- Tarefa não trivial: use o agente `planejador` antes de codar e espere o dev aprovar o plano.
-- Implemente **um passo por vez** com o agente `implementador` (TDD: teste vermelho → código → verde → commit).
-- Depois de cada passo: `revisor-spec`, depois `revisor-qualidade`.
-- No fim: `qa-adversarial` (+ `revisor-seguranca` e `revisor-ux` quando ligados e relevantes).
-- Achado CRITICAL/HIGH: o dev decide — corrigir (teste primeiro) ou aceitar o risco por escrito no PR.
+Modo do projeto: `.devmais/config.yml` → `modo` (`automatico` ou `manual`). O dev pode trocar na conversa.
+
+**Primeiro classifique o pedido** e use só o processo que ele merece:
+| Tipo | Processo |
+|---|---|
+| Conversa (dúvida, explicação, opinião) | Responde direto. Nenhum agente, nenhuma branch. |
+| Trivial (texto, typo, config, ≤ ~20 linhas sem regra de negócio) | Faz direto → gates locais → branch + PR. Sem agentes. |
+| Normal | Conforme o modo (abaixo). |
+| Arriscada (login, permissão, pagamento, dado pessoal, migração, infra, apagar dados; ou caminhos de `revisor_seguranca`) | Fluxo completo em qualquer modo: plano aprovado, QA + segurança, dev aprova o merge. |
+Na dúvida, escolha o tipo de mais cuidado e diga qual em uma linha.
+
+**Modo automático:** planeje internamente (mostre o plano só se pedirem, se for arriscada ou ambígua) → implemente
+você mesmo em TDD → no fim, **uma** revisão com `revisor-geral` (+ `revisor-ux`/`revisor-seguranca` se os caminhos
+baterem) → PR → com CI verde e `merge_automatico: true`, faça o merge → responda com o **resumo de regra de negócio**:
+```
+Feito: <o que mudou para o usuário / na regra, em 1-2 frases>
+Testado: <quantos casos, quais bordas>. CI verde.
+Publicado: <tag ou PR>. Produção conferida.
+Decisão sua: <nenhuma | a pergunta, com a opção recomendada>
+```
+Detalhe técnico só se o dev perguntar.
+
+**Modo manual:** `planejador` → dev aprova → um passo por vez com `implementador` → `revisor-spec` → `revisor-qualidade`
+→ no fim `qa-adversarial` (+ UX/segurança por caminhos) → PR → o dev faz o merge. Uma linha de atualização por etapa.
+
+**Em qualquer modo, decisão é do dev:** regra de negócio ambígua, achado CRITICAL/HIGH (corrigir com teste primeiro
+ou aceitar o risco por escrito no PR), dado de produção, alterar teste existente.
 
 ## Git
 - Nunca commitar nem dar push direto na `main`. Sempre branch + PR.

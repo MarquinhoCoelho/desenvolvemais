@@ -1,4 +1,7 @@
-# Fluxo de uma tarefa
+# Fluxo de uma tarefa (modo manual e tarefas arriscadas)
+
+> Este é o fluxo **completo**. Dúvidas, tarefas triviais e o modo automático usam versões mais leves —
+> veja [00-modos.md](00-modos.md). As regras de rastreabilidade e formato de achados abaixo valem para todos.
 
 O Claude principal da conversa é o **orquestrador**: ele não escreve a feature sozinho, ele distribui
 o trabalho para os agentes de [agentes/](../agentes/) e junta os resultados.

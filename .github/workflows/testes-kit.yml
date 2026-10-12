@@ -1,0 +1,27 @@
+# Testes do próprio kit: as travas (hooks), o checar-ui e a sintaxe dos scripts.
+# Todo PR no desenvolvemais roda isso; caso que deu falso positivo em projeto real vira teste em testes/.
+name: Testes do kit
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22   # node --test com * no caminho precisa do Node 21+
+      - name: Travas e checar-ui
+        run: node --test "testes/*.test.mjs"
+      - name: Sintaxe dos scripts shell
+        run: |
+          bash -n templates/deploy/deploy.sh
+          bash -n templates/deploy/smoke.sh
