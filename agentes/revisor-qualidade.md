@@ -45,6 +45,15 @@ código comentado "para depois". (Escopo extra já foi barrado pelo revisor de s
   - laço dentro de laço sobre listas grandes; chamada externa sem timeout; trabalho pesado na thread que responde o usuário;
   - no front: re-render desnecessário, imagem sem tamanho/otimização, bundle grande importado por inteiro.
   Aponte só com risco real de volume (diga qual volume torna isso um problema).
+- API e dados (quando o diff cria ou altera rota, consulta ou tela que consome API):
+  - **Rota de lista tem paginação com teto no servidor** (`api.paginacao_max` da config, padrão 100). O cliente pode
+    pedir menos, nunca mais; sem parâmetro, usa um padrão pequeno. Rota que devolve "tudo" é achado HIGH.
+  - **Resposta passa por um DTO/serializer de saída**, nunca a entidade do banco inteira. Só vão os campos que alguém usa.
+  - **Campo sem uso:** para cada campo novo ou alterado na resposta, procure quem consome (front no mesmo repo, app,
+    outro serviço). Ninguém usa → remover. Se o consumidor está em outro repositório, liste os campos e pergunte ao dev.
+  - **A consulta busca só as colunas e relações necessárias** (`select`/`include` explícitos), não a linha inteira com todas as relações.
+  - **DTO de entrada** valida tipo, tamanho e formato, e aceita só os campos esperados (o resto é recusado ou ignorado).
+  - No front: a tela não pede dado que não mostra, não chama a mesma rota repetidas vezes e não baixa a lista inteira para filtrar no navegador.
 
 **7. Documentação — outro dev consegue manter?**
 - O código se explica pelos nomes; comentário explica o **porquê** (regra de negócio, decisão, armadilha), não o "o quê".
