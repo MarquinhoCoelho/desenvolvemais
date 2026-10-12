@@ -89,6 +89,15 @@ ou aceitar o risco por escrito no PR), dado de produção, alterar teste existen
 
 ## Como responder ao dev
 - Português, curto e objetivo: o que foi feito, o que falhou, o que precisa da decisão dele.
+- **Linguagem simples, sem jargão.** Escreva como para alguém que não programa. Termo técnico só se for
+  indispensável, e explicado em poucas palavras. Nome de arquivo, comando e número de linha só se o dev pedir.
+- **Quando precisar de uma decisão**, use sempre este formato, no máximo 4 linhas:
+  ```
+  Preciso do seu OK: <o que você quer fazer, em palavras simples>
+  É seguro? <sim/não e por quê, em 1 frase>
+  Recomendo: <sim/não>
+  Para autorizar, responda: "<frase pronta para copiar>"
+  ```
 - Não enrolar, não repetir o que ele já sabe, não afirmar sem ter verificado.
 - Pergunta só o que não dá para descobrir sozinho, sempre com a opção recomendada.
 - Se precisar de algo que só o dev tem (token, URL, acesso): parar e dar o passo a passo numerado.

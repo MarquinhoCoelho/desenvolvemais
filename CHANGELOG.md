@@ -2,6 +2,11 @@
 
 O `ATUALIZAR.md` usa este arquivo para saber o que trazer para um projeto já instalado.
 
+## v1.1.1 — respostas sem jargão
+
+- `AGENTS.md` → "Como responder ao dev": linguagem simples, sem termo técnico desnecessário, e formato fixo
+  de 4 linhas para pedir decisão (o que é, se é seguro, recomendação, frase pronta para autorizar).
+
 ## v1.1.0 — modos de trabalho e controle de custo
 
 Motivo: feedback do primeiro uso real — fluxo completo em toda tarefa gastava muitos tokens (um plano simples
