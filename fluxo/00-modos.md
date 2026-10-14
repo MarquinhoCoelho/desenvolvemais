@@ -37,6 +37,19 @@ Publicado: prod-2026.10.12-3 (PR #42). Produção conferida.
 Decisão sua: nenhuma.      ← ou a pergunta, com a opção recomendada
 ```
 
+### Teste completo sob pedido
+
+No automático, o dev pode pedir o fluxo completo **só para uma tarefa**, sem trocar o modo:
+"teste completo", "revisão completa", "capricha nos testes". Essa tarefa passa por plano, `qa-adversarial`
+e pelos revisores de segurança e UX conforme os caminhos. Na tarefa seguinte, volta ao modo da config.
+
+| Pedido do dev | O que acontece |
+|---|---|
+| "corrige o texto do botão" | Trivial: faz direto, sem agentes |
+| "cria o filtro por data na lista de alunos" | Normal no automático: só `revisor-geral` no fim |
+| "cria o filtro por data, teste completo" | Fluxo completo nesta tarefa; a próxima volta ao automático |
+| "muda a regra de cobrança" | Arriscada: fluxo completo mesmo sem pedir |
+
 ## 3. Modo manual
 
 O dev acompanha tudo. É o fluxo completo de [02-fluxo-de-tarefa.md](02-fluxo-de-tarefa.md):
