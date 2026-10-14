@@ -56,6 +56,10 @@ Detalhe técnico só se o dev perguntar.
 **Modo manual:** `planejador` → dev aprova → um passo por vez com `implementador` → `revisor-spec` → `revisor-qualidade`
 → no fim `qa-adversarial` (+ UX/segurança por caminhos) → PR → o dev faz o merge. Uma linha de atualização por etapa.
 
+**Teste completo sob pedido:** se o dev pedir "teste completo", "revisão completa" ou "capricha nos testes", faça
+**essa** tarefa com o fluxo completo (plano, QA adversarial, segurança e UX pelos caminhos), sem trocar o `modo`.
+Na tarefa seguinte, volta ao modo da config.
+
 **Em qualquer modo, decisão é do dev:** regra de negócio ambígua, achado CRITICAL/HIGH (corrigir com teste primeiro
 ou aceitar o risco por escrito no PR), dado de produção, alterar teste existente.
 

@@ -2,6 +2,12 @@
 
 O `ATUALIZAR.md` usa este arquivo para saber o que trazer para um projeto já instalado.
 
+## Próxima versão: teste completo sob pedido
+
+- `AGENTS.md` → "Fluxo de trabalho" e `fluxo/00-modos.md`: no automático, o dev pode pedir "teste completo"
+  para **uma** tarefa (plano, QA, segurança e UX pelos caminhos) sem trocar o `modo`. Motivo: o dev quer o modo
+  econômico por padrão e o fluxo completo só quando pedir.
+
 ## v1.1.1 — respostas sem jargão
 
 - `AGENTS.md` → "Como responder ao dev": linguagem simples, sem termo técnico desnecessário, e formato fixo
